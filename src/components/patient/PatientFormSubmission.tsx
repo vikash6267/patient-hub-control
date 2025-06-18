@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -81,21 +80,15 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
       const patientDoc = await getDoc(patientDocRef);
       const patientData = patientDoc.data();
 
-      // Create form response with patient details
+      // Create form response object
       const formResponse = {
         formId: assignedForm.id,
         formName: assignedForm.name,
-        patientId: patientId,
-        patientName: patientData?.firstName || patientData?.name || "Unknown",
-        patientEmail: patientData?.email || "",
         responses: formData,
         submittedAt: new Date().toISOString(),
         submittedDate: new Date().toISOString().split("T")[0],
         status: "completed"
       };
-
-      // Save form response to forms collection
-      await addDoc(collection(db, "formResponses"), formResponse);
 
       // Update patient's assigned forms to mark as completed
       const updatedAssignedForms = patientData?.assignedForms?.map((form: any) => 
@@ -104,11 +97,25 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
           : form
       ) || [];
 
-      // Update patient record in auth schema
+      // Store form response in patient's auth document under forms field
+      const currentForms = patientData?.forms || [];
+      const updatedForms = [...currentForms, formResponse];
+
+      // Update patient record in auth schema with form response
       await updateDoc(patientDocRef, {
         assignedForms: updatedAssignedForms,
-        formResponses: arrayUnion(formResponse)
+        forms: updatedForms
       });
+
+      // Also save to separate formResponses collection for admin tracking
+      const formResponseForAdmin = {
+        ...formResponse,
+        patientId: patientId,
+        patientName: patientData?.firstName || patientData?.name || "Unknown",
+        patientEmail: patientData?.email || "",
+      };
+
+      await addDoc(collection(db, "formResponses"), formResponseForAdmin);
 
       // Update the main form document to track responses
       const formDocRef = doc(db, "forms", assignedForm.id);
