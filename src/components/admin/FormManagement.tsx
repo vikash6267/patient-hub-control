@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,13 +27,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import FormBuilder from "./FormBuilder"; // Assuming FormBuilder defines FormStructure
+import FormBuilder from "./FormBuilder";
 import FormPreview from "./FormPreview";
 import PatientFormResponses from "./PatientFormResponses";
-// Make sure this import points to the correct path for SendFormToPatientsDialog
-import SendFormToPatientsDialog, {
-  FormStructure,
-} from "./SendFormToPatientsDialog";
+import SendFormToPatientsDialog from "./SendFormToPatientsDialog";
+import { FormStructure } from "@/types/forms";
 
 // Firebase imports
 import {
@@ -53,7 +52,6 @@ const FormManagement = () => {
   const [isSendToPatientsDialogOpen, setIsSendToPatientsDialogOpen] =
     useState(false);
   const [selectedForm, setSelectedForm] = useState<FormStructure | null>(null);
-  // formToSend now holds the complete FormStructure object
   const [formToSend, setFormToSend] = useState<FormStructure | null>(null);
   const [previewForm, setPreviewForm] = useState<FormStructure | null>(null);
   const [activeTab, setActiveTab] = useState("forms");
@@ -72,7 +70,6 @@ const FormManagement = () => {
         const fetchedForms: FormStructure[] = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...(doc.data() as Omit<FormStructure, "id">),
-          // Ensure assignTo is an array, even if empty or missing in Firebase
           assignTo: (doc.data().assignTo as string[] | undefined) || [],
         }));
         setForms(fetchedForms);
@@ -110,7 +107,6 @@ const FormManagement = () => {
         await updateDoc(formDocRef, {
           ...formData,
           lastModified: new Date().toISOString().split("T")[0],
-          // Important: Preserve existing assignTo when editing, or reset if desired
           assignTo: formData.assignTo || selectedForm.assignTo || [],
         });
         toast({
@@ -122,7 +118,7 @@ const FormManagement = () => {
           ...formData,
           created: new Date().toISOString().split("T")[0],
           lastModified: new Date().toISOString().split("T")[0],
-          assignTo: formData.assignTo || [], // Initialize assignTo as an empty array for new forms
+          assignTo: formData.assignTo || [],
         };
         await addDoc(formsCollectionRef, newFormData);
         toast({
@@ -147,16 +143,12 @@ const FormManagement = () => {
     setIsPreviewDialogOpen(true);
   };
 
-  // Corrected handleSendForm to pass the entire form object
   const handleSendForm = (form: FormStructure) => {
-    setFormToSend(form); // Set the entire form object
+    setFormToSend(form);
     setIsSendToPatientsDialogOpen(true);
   };
 
   const getFormResponses = (formId: string) => {
-    // This part remains mock for now, but in a real app,
-    // you'd query a 'formResponses' collection for the count.
-    // Replace with actual logic to count responses for a given formId.
     const responseCounts = {
       "1": 45,
       "2": 128,
@@ -230,7 +222,6 @@ const FormManagement = () => {
             <BarChart3 className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            {/* This is a static value, you'd calculate it based on real data */}
             <div className="text-2xl font-bold text-purple-600">87%</div>
           </CardContent>
         </Card>
@@ -291,8 +282,7 @@ const FormManagement = () => {
                           <span className="text-gray-500">Fields:</span>
                           <p className="font-medium">
                             {form.fields?.length || 0}
-                          </p>{" "}
-                          {/* Added optional chaining and default */}
+                          </p>
                         </div>
                         <div>
                           <span className="text-gray-500">Responses:</span>
@@ -336,7 +326,7 @@ const FormManagement = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleSendForm(form)} // Corrected: Pass the entire form object
+                          onClick={() => handleSendForm(form)}
                           disabled={form.status === "draft"}
                         >
                           <Send className="w-4 h-4 mr-1" />
@@ -459,18 +449,18 @@ const FormManagement = () => {
             <FormPreview
               form={previewForm}
               onClose={() => setIsPreviewDialogOpen(false)}
-              patientId="current_patient" // This might need to be a real patient ID for actual preview functionality
+              patientId="current_patient"
             />
           )}
         </DialogContent>
       </Dialog>
 
       {/* Send to Patients Dialog */}
-      {formToSend && ( // Only render if a form is selected to send
+      {formToSend && (
         <SendFormToPatientsDialog
           isOpen={isSendToPatientsDialogOpen}
           onClose={() => setIsSendToPatientsDialogOpen(false)}
-          form={formToSend} // Corrected: Pass the entire formToSend object
+          form={formToSend}
         />
       )}
     </div>

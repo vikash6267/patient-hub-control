@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "react-toastify";
 import { collection, doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { db } from "@/firebase";
-import { FormStructure } from "../admin/SendFormToPatientsDialog";
+import { FormStructure } from "@/types/forms";
 
 interface PatientFormSubmissionProps {
   patientId: string;

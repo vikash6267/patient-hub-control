@@ -33,73 +33,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-
-export interface FormField {
-  id: string;
-  type:
-    | "text"
-    | "number"
-    | "email"
-    | "phone"
-    | "textarea"
-    | "select"
-    | "checkbox"
-    | "radio"
-    | "date"
-    | "time"
-    | "datetime"
-    | "file"
-    | "url"
-    | "password"
-    | "range"
-    | "rating"
-    | "signature"
-    | "location"
-    | "multi-select"
-    | "switch"
-    | "color";
-  label: string;
-  placeholder?: string;
-  required: boolean;
-  options?: string[];
-  validation?: {
-    min?: number;
-    max?: number;
-    minLength?: number;
-    maxLength?: number;
-    pattern?: string;
-    customMessage?: string;
-    fileTypes?: string[];
-    maxFileSize?: number;
-  };
-  conditional?: {
-    dependsOn?: string;
-    showWhen?: string;
-    operator?:
-      | "equals"
-      | "not-equals"
-      | "contains"
-      | "greater-than"
-      | "less-than";
-  };
-  styling?: {
-    width?: "full" | "half" | "third" | "quarter";
-    columns?: number;
-    inline?: boolean;
-  };
-  helpText?: string;
-  defaultValue?: any;
-}
-
-export interface FormStructure {
-  id: string;
-  name: string;
-  description: string;
-  fields: FormField[];
-  status: "draft" | "active";
-  created: string;
-  lastModified: string;
-}
+import { FormBuilderField, FormStructure } from "@/types/forms";
 
 interface FormBuilderProps {
   form?: FormStructure;
@@ -147,13 +81,14 @@ const FormBuilder = ({ form, onSave, onPreview }: FormBuilderProps) => {
   ];
 
   const addField = () => {
-    const newField: FormField = {
+    const newField: FormBuilderField = {
       id: `field_${Date.now()}`,
       type: "text",
       label: "New Field",
       required: false,
       styling: { width: "full" },
       validation: {},
+      options: [],
     };
 
     setFormData({
@@ -162,7 +97,7 @@ const FormBuilder = ({ form, onSave, onPreview }: FormBuilderProps) => {
     });
   };
 
-  const updateField = (index: number, updates: Partial<FormField>) => {
+  const updateField = (index: number, updates: Partial<FormBuilderField>) => {
     const updatedFields = [...(formData.fields || [])];
     updatedFields[index] = { ...updatedFields[index], ...updates };
     setFormData({ ...formData, fields: updatedFields });
@@ -179,7 +114,7 @@ const FormBuilder = ({ form, onSave, onPreview }: FormBuilderProps) => {
     setIsAdvancedDialogOpen(true);
   };
 
-  const updateAdvancedSettings = (updates: Partial<FormField>) => {
+  const updateAdvancedSettings = (updates: Partial<FormBuilderField>) => {
     if (selectedFieldIndex !== null) {
       updateField(selectedFieldIndex, updates);
     }
@@ -206,13 +141,14 @@ const FormBuilder = ({ form, onSave, onPreview }: FormBuilderProps) => {
     }
 
     const formToSave: FormStructure = {
-      // id: form?.id || `form_${Date.now()}`,
+      id: form?.id || `form_${Date.now()}`,
       name: formData.name!,
       description: formData.description || "",
       fields: formData.fields!,
-      status: formData.status as "draft" | "active",
+      status: formData.status as "draft" | "active" | "archived",
       created: form?.created || new Date().toISOString().split("T")[0],
       lastModified: new Date().toISOString().split("T")[0],
+      assignTo: form?.assignTo || [],
     };
 
     onSave(formToSave);
@@ -234,19 +170,20 @@ const FormBuilder = ({ form, onSave, onPreview }: FormBuilderProps) => {
     }
 
     const formToPreview: FormStructure = {
-      // id: form?.id || `preview_${Date.now()}`,
+      id: form?.id || `preview_${Date.now()}`,
       name: formData.name!,
       description: formData.description || "",
       fields: formData.fields!,
-      status: formData.status as "draft" | "active",
+      status: formData.status as "draft" | "active" | "archived",
       created: form?.created || new Date().toISOString().split("T")[0],
       lastModified: new Date().toISOString().split("T")[0],
+      assignTo: form?.assignTo || [],
     };
 
     onPreview(formToPreview);
   };
 
-  const renderFieldPreview = (field: FormField) => {
+  const renderFieldPreview = (field: FormBuilderField) => {
     switch (field.type) {
       case "range":
         return (
@@ -393,7 +330,7 @@ const FormBuilder = ({ form, onSave, onPreview }: FormBuilderProps) => {
               onValueChange={(value) =>
                 setFormData({
                   ...formData,
-                  status: value as "draft" | "active",
+                  status: value as "draft" | "active" | "archived",
                 })
               }
             >
@@ -431,7 +368,7 @@ const FormBuilder = ({ form, onSave, onPreview }: FormBuilderProps) => {
                     <Select
                       value={field.type}
                       onValueChange={(value) =>
-                        updateField(index, { type: value as FormField["type"] })
+                        updateField(index, { type: value as FormBuilderField["type"] })
                       }
                     >
                       <SelectTrigger>
@@ -484,14 +421,12 @@ const FormBuilder = ({ form, onSave, onPreview }: FormBuilderProps) => {
                   <div>
                     <Label>Options (one per line)</Label>
                     <Textarea
-                      value={field.options?.join("\n") || ""}
-                      onChange={(e) =>
-                        updateField(index, {
-                          options: e.target.value
-                            .split("\n")
-                            .filter((o) => o.trim()),
-                        })
-                      }
+                      value={field.options?.map(opt => typeof opt === 'string' ? opt : opt.label).join("\n") || ""}
+                      onChange={(e) => {
+                        const optionTexts = e.target.value.split("\n").filter((o) => o.trim());
+                        const options = optionTexts.map(text => ({ value: text.toLowerCase().replace(/\s+/g, '_'), label: text }));
+                        updateField(index, { options });
+                      }}
                       placeholder="Option 1&#10;Option 2&#10;Option 3"
                       rows={3}
                     />

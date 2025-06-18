@@ -7,10 +7,8 @@ import PatientFormSubmission from "@/components/patient/PatientFormSubmission";
 import PatientOrderCreation from "@/components/patient/PatientOrderCreation";
 
 const Patients = () => {
-  // This would normally come from authentication context
-  const currentPatientId = "patient_123"; // Mock patient ID
+  const currentPatientId = "patient_123";
   
-  // Mock assigned forms - this would come from Firebase
   const [assignedForms] = useState([
     {
       id: "form_1",
@@ -66,7 +64,7 @@ const Patients = () => {
           required: true
         }
       ],
-      status: "active",
+      status: "active" as const,
       created: "2024-01-15",
       lastModified: "2024-01-15",
       assignedDate: "2024-01-20",
@@ -75,7 +73,6 @@ const Patients = () => {
   ]);
 
   const handleFormSubmitted = () => {
-    // Refresh assigned forms or update status
     console.log("Form submitted successfully");
   };
 

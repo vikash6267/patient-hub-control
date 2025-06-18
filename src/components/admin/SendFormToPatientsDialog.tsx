@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -17,39 +18,13 @@ import {
   arrayUnion,
   where,
 } from "firebase/firestore";
-import { db } from "../../firebase"; // Ensure this path is correct
+import { db } from "../../firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { FormStructure } from "@/types/forms";
 
-// --- Type Definitions ---
-interface FormBuilderField {
-  id: string;
-  type: string;
-  label: string;
-  options?: { value: string; label: string }[];
-  placeholder?: string;
-  required?: boolean;
-}
-
-export interface FormStructure {
-  id: string;
-  name: string;
-  description: string;
-  fields: FormBuilderField[];
-  status: "draft" | "active" | "archived";
-  created: string;
-  lastModified: string;
-  assignTo?: string[]; // Array to store patient IDs
-}
-
-/**
- * Note: For Firestore, undefined values are automatically ignored during writes (setDoc, updateDoc).
- * This function might not be strictly necessary if its only purpose is to prepare data for Firestore,
- * as Firestore handles undefined fields by omitting them.
- * Keep it if you have other specific reasons for removing undefined properties.
- */
 function removeUndefined(obj: any): any {
   if (obj === null || typeof obj !== "object") {
     return obj;
@@ -73,8 +48,8 @@ function removeUndefined(obj: any): any {
 
 interface Patient {
   id: string;
-  firstName: string; // Added firstName to match filtering logic
-  name: string; // Keeping 'name' if it's also present or used elsewhere
+  firstName: string;
+  name: string;
   email: string;
   role: string;
   assignedForms?: (FormStructure & {
@@ -110,10 +85,9 @@ const SendFormToPatientsDialog: React.FC<SendFormToPatientsDialogProps> = ({
         const querySnapshot = await getDocs(q);
         const fetchedPatients: Patient[] = querySnapshot.docs.map((doc) => {
           const data = doc.data() as Omit<Patient, "id">;
-          // Ensure firstName is available, fallback to 'name' or empty string if not directly present
           return {
             id: doc.id,
-            firstName: data.firstName || data.name || "", // Fallback
+            firstName: data.firstName || data.name || "",
             ...data,
           };
         });
@@ -132,14 +106,12 @@ const SendFormToPatientsDialog: React.FC<SendFormToPatientsDialogProps> = ({
 
     if (isOpen) {
       fetchPatients();
-      // Optionally pre-select patients if the form already has them assigned
       setSelectedPatientIds(form.assignTo || []);
     } else {
-      // Reset state when dialog closes
       setSelectedPatientIds([]);
       setSearchTerm("");
     }
-  }, [isOpen, toast, form.assignTo]); // Added form.assignTo to dependencies for pre-selection
+  }, [isOpen, toast, form.assignTo]);
 
   const handleCheckboxChange = (patientId: string, isChecked: boolean) => {
     setSelectedPatientIds((prev) =>
@@ -152,7 +124,7 @@ const SendFormToPatientsDialog: React.FC<SendFormToPatientsDialogProps> = ({
       toast({
         title: "No Patients Selected",
         description: "Please select at least one patient to send the form to.",
-        variant: "warning",
+        variant: "destructive",
       });
       return;
     }
@@ -161,7 +133,6 @@ const SendFormToPatientsDialog: React.FC<SendFormToPatientsDialogProps> = ({
     try {
       const formToAssign = removeUndefined({
         ...form,
-        // Make sure 'id' is explicitly set from the form object, as 'removeUndefined' might alter it if it finds undefined fields
         id: form.id,
         assignedDate: new Date().toISOString().split("T")[0],
         assignedStatus: "pending",
@@ -169,7 +140,6 @@ const SendFormToPatientsDialog: React.FC<SendFormToPatientsDialogProps> = ({
 
       console.log("Form object to assign to patient:", formToAssign);
 
-      // --- 1. Update each selected patient's document in the 'auth' collection ---
       const updatePatientPromises = selectedPatientIds.map((patientId) => {
         const patientDocRef = doc(db, "auth", patientId);
         return updateDoc(patientDocRef, {
@@ -177,10 +147,9 @@ const SendFormToPatientsDialog: React.FC<SendFormToPatientsDialogProps> = ({
         });
       });
 
-      // --- 2. Update the form document in the 'forms' collection with assigned patient IDs ---
       const formDocRef = doc(db, "forms", form.id);
       const updateFormPromise = updateDoc(formDocRef, {
-        assignTo: arrayUnion(...selectedPatientIds), // Use arrayUnion with spread operator to add multiple IDs
+        assignTo: arrayUnion(...selectedPatientIds),
       });
 
       await Promise.all([...updatePatientPromises, updateFormPromise]);
