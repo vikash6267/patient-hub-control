@@ -82,7 +82,6 @@ const FormBuilder = ({ form, onSave, onPreview }: FormBuilderProps) => {
 
   const addField = () => {
     const newField: FormBuilderField = {
-      id: `field_${Date.now()}`,
       type: "text",
       label: "New Field",
       required: false,
@@ -141,7 +140,6 @@ const FormBuilder = ({ form, onSave, onPreview }: FormBuilderProps) => {
     }
 
     const formToSave: FormStructure = {
-      id: form?.id || `form_${Date.now()}`,
       name: formData.name!,
       description: formData.description || "",
       fields: formData.fields!,
@@ -368,7 +366,9 @@ const FormBuilder = ({ form, onSave, onPreview }: FormBuilderProps) => {
                     <Select
                       value={field.type}
                       onValueChange={(value) =>
-                        updateField(index, { type: value as FormBuilderField["type"] })
+                        updateField(index, {
+                          type: value as FormBuilderField["type"],
+                        })
                       }
                     >
                       <SelectTrigger>
@@ -421,10 +421,21 @@ const FormBuilder = ({ form, onSave, onPreview }: FormBuilderProps) => {
                   <div>
                     <Label>Options (one per line)</Label>
                     <Textarea
-                      value={field.options?.map(opt => typeof opt === 'string' ? opt : opt.label).join("\n") || ""}
+                      value={
+                        field.options
+                          ?.map((opt) =>
+                            typeof opt === "string" ? opt : opt.label
+                          )
+                          .join("\n") || ""
+                      }
                       onChange={(e) => {
-                        const optionTexts = e.target.value.split("\n").filter((o) => o.trim());
-                        const options = optionTexts.map(text => ({ value: text.toLowerCase().replace(/\s+/g, '_'), label: text }));
+                        const optionTexts = e.target.value
+                          .split("\n")
+                          .filter((o) => o.trim());
+                        const options = optionTexts.map((text) => ({
+                          value: text.toLowerCase().replace(/\s+/g, "_"),
+                          label: text,
+                        }));
                         updateField(index, { options });
                       }}
                       placeholder="Option 1&#10;Option 2&#10;Option 3"

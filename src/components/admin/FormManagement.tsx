@@ -55,7 +55,8 @@ const FormManagement = () => {
   const [selectedForm, setSelectedForm] = useState<FormStructure | null>(null);
   const [formToSend, setFormToSend] = useState<FormStructure | null>(null);
   const [previewForm, setPreviewForm] = useState<FormStructure | null>(null);
-  const [selectedFormForResponses, setSelectedFormForResponses] = useState<FormStructure | null>(null);
+  const [selectedFormForResponses, setSelectedFormForResponses] =
+    useState<FormStructure | null>(null);
   const [activeTab, setActiveTab] = useState("forms");
 
   const [forms, setForms] = useState<FormStructure[]>([]);
@@ -339,13 +340,13 @@ const FormManagement = () => {
                           <Send className="w-4 h-4 mr-1" />
                           Send to Patients
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => handleViewResponses(form)}
                         >
                           <Users className="w-4 h-4 mr-1" />
-                          View Responses ({getFormResponses(form.id)})
+                          View Responses
                         </Button>
                       </div>
                     </div>
@@ -477,7 +478,10 @@ const FormManagement = () => {
       )}
 
       {/* Form Responses Dialog */}
-      <Dialog open={isResponseDialogOpen} onOpenChange={setIsResponseDialogOpen}>
+      <Dialog
+        open={isResponseDialogOpen}
+        onOpenChange={setIsResponseDialogOpen}
+      >
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Form Responses</DialogTitle>

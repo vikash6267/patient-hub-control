@@ -15,13 +15,13 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { FormStructure, FormBuilderField } from "@/types/forms";
-import { 
-  doc, 
-  updateDoc, 
-  arrayUnion, 
-  collection, 
+import {
+  doc,
+  updateDoc,
+  arrayUnion,
+  collection,
   addDoc,
-  getDoc 
+  getDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 
@@ -45,35 +45,39 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleFieldChange = (fieldId: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [fieldId]: value
+      [fieldId]: value,
     }));
   };
 
   const validateForm = () => {
-    const requiredFields = assignedForm.fields.filter(field => field.required);
-    const missingFields = requiredFields.filter(field => 
-      !formData[field.id] || formData[field.id] === ""
+    const requiredFields = assignedForm.fields.filter(
+      (field) => field.required
+    );
+    const missingFields = requiredFields.filter(
+      (field) => !formData[field.id] || formData[field.id] === ""
     );
     return missingFields;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const missingFields = validateForm();
     if (missingFields.length > 0) {
       toast({
         title: "Required Fields Missing",
-        description: `Please fill in: ${missingFields.map(f => f.label).join(", ")}`,
+        description: `Please fill in: ${missingFields
+          .map((f) => f.label)
+          .join(", ")}`,
         variant: "destructive",
       });
       return;
     }
 
     setIsSubmitting(true);
-    
+
     try {
       // Get patient details from auth collection
       const patientDocRef = doc(db, "auth", patientId);
@@ -87,15 +91,20 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
         responses: formData,
         submittedAt: new Date().toISOString(),
         submittedDate: new Date().toISOString().split("T")[0],
-        status: "completed"
+        status: "completed",
       };
 
       // Update patient's assigned forms to mark as completed
-      const updatedAssignedForms = patientData?.assignedForms?.map((form: any) => 
-        form.id === assignedForm.id 
-          ? { ...form, assignedStatus: "completed", completedAt: new Date().toISOString() }
-          : form
-      ) || [];
+      const updatedAssignedForms =
+        patientData?.assignedForms?.map((form: any) =>
+          form.id === assignedForm.id
+            ? {
+                ...form,
+                assignedStatus: "completed",
+                completedAt: new Date().toISOString(),
+              }
+            : form
+        ) || [];
 
       // Store form response in patient's auth document under forms field
       const currentForms = patientData?.forms || [];
@@ -104,7 +113,7 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
       // Update patient record in auth schema with form response
       await updateDoc(patientDocRef, {
         assignedForms: updatedAssignedForms,
-        forms: updatedForms
+        forms: updatedForms,
       });
 
       // Also save to separate formResponses collection for admin tracking
@@ -124,8 +133,8 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
           patientId: patientId,
           patientName: patientData?.firstName || patientData?.name || "Unknown",
           submittedAt: new Date().toISOString(),
-          responseId: Date.now().toString()
-        })
+          responseId: Date.now().toString(),
+        }),
       });
 
       toast({
@@ -137,7 +146,6 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
       onFormSubmitted();
       setIsExpanded(false);
       setFormData({});
-
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
@@ -193,12 +201,14 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
 
       case "select":
         return (
-          <Select 
-            value={value} 
+          <Select
+            value={value}
             onValueChange={(newValue) => handleFieldChange(field.id, newValue)}
           >
             <SelectTrigger>
-              <SelectValue placeholder={field.placeholder || "Select an option"} />
+              <SelectValue
+                placeholder={field.placeholder || "Select an option"}
+              />
             </SelectTrigger>
             <SelectContent>
               {field.options?.map((option) => (
@@ -212,14 +222,19 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
 
       case "radio":
         return (
-          <RadioGroup 
-            value={value} 
+          <RadioGroup
+            value={value}
             onValueChange={(newValue) => handleFieldChange(field.id, newValue)}
           >
             {field.options?.map((option) => (
               <div key={option.value} className="flex items-center space-x-2">
-                <RadioGroupItem value={option.value} id={`${field.id}-${option.value}`} />
-                <Label htmlFor={`${field.id}-${option.value}`}>{option.label}</Label>
+                <RadioGroupItem
+                  value={option.value}
+                  id={`${field.id}-${option.value}`}
+                />
+                <Label htmlFor={`${field.id}-${option.value}`}>
+                  {option.label}
+                </Label>
               </div>
             ))}
           </RadioGroup>
@@ -231,7 +246,9 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
             <Checkbox
               id={field.id}
               checked={!!value}
-              onCheckedChange={(checked) => handleFieldChange(field.id, checked)}
+              onCheckedChange={(checked) =>
+                handleFieldChange(field.id, checked)
+              }
             />
             <Label htmlFor={field.id} className="text-sm">
               {field.label}
@@ -277,12 +294,12 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-green-800">{assignedForm.name}</h3>
-              <p className="text-sm text-green-600">✓ Completed</p>
+              <h3 className="font-semibold text-green-800">
+                {assignedForm.name}
+              </h3>
+              <p className="text-sm text-green-600"> Completed</p>
             </div>
-            <div className="text-xs text-green-600">
-              Submitted successfully
-            </div>
+            <div className="text-xs text-green-600">Submitted successfully</div>
           </div>
         </CardContent>
       </Card>
@@ -295,7 +312,9 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg">{assignedForm.name}</CardTitle>
-            <p className="text-sm text-gray-600 mt-1">{assignedForm.description}</p>
+            <p className="text-sm text-gray-600 mt-1">
+              {assignedForm.description}
+            </p>
             <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
               <span>Assigned: {assignedForm.assignedDate}</span>
               <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded">
@@ -303,8 +322,8 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
               </span>
             </div>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setIsExpanded(!isExpanded)}
             disabled={isSubmitting}
           >
@@ -320,7 +339,9 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
               <div key={field.id} className="space-y-2">
                 <Label htmlFor={field.id} className="text-sm font-medium">
                   {field.label}
-                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                  {field.required && (
+                    <span className="text-red-500 ml-1">*</span>
+                  )}
                 </Label>
                 {field.helpText && (
                   <p className="text-xs text-gray-500">{field.helpText}</p>
@@ -331,16 +352,16 @@ const PatientFormSubmission: React.FC<PatientFormSubmissionProps> = ({
             ))}
 
             <div className="flex gap-3 pt-4">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isSubmitting}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 {isSubmitting ? "Submitting..." : "Submit Form"}
               </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => setIsExpanded(false)}
                 disabled={isSubmitting}
               >
