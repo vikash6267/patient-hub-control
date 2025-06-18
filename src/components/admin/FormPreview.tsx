@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { FormStructure } from "./FormBuilder";
+import { FormStructure } from "@/types/forms";
 
 interface FormPreviewProps {
   form: FormStructure;
@@ -194,9 +194,9 @@ const FormPreview = ({ form, onClose, patientId }: FormPreviewProps) => {
                 <SelectValue placeholder={field.placeholder || `Select ${field.label}`} />
               </SelectTrigger>
               <SelectContent>
-                {field.options?.map((option: string, index: number) => (
-                  <SelectItem key={index} value={option}>
-                    {option}
+                {field.options?.map((option: any, index: number) => (
+                  <SelectItem key={index} value={typeof option === 'string' ? option : option.value}>
+                    {typeof option === 'string' ? option : option.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -235,10 +235,15 @@ const FormPreview = ({ form, onClose, patientId }: FormPreviewProps) => {
               onValueChange={(value) => handleInputChange(field.id, value)}
               className={fieldError ? 'border border-red-500 rounded p-2' : ''}
             >
-              {field.options?.map((option: string, index: number) => (
+              {field.options?.map((option: any, index: number) => (
                 <div key={index} className="flex items-center space-x-2">
-                  <RadioGroupItem value={option} id={`${field.id}_${index}`} />
-                  <Label htmlFor={`${field.id}_${index}`}>{option}</Label>
+                  <RadioGroupItem 
+                    value={typeof option === 'string' ? option : option.value} 
+                    id={`${field.id}_${index}`} 
+                  />
+                  <Label htmlFor={`${field.id}_${index}`}>
+                    {typeof option === 'string' ? option : option.label}
+                  </Label>
                 </div>
               ))}
             </RadioGroup>

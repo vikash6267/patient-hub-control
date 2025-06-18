@@ -1,15 +1,18 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, ShoppingCart, User } from "lucide-react";
 import PatientFormSubmission from "@/components/patient/PatientFormSubmission";
 import PatientOrderCreation from "@/components/patient/PatientOrderCreation";
+import { FormStructure, FormBuilderField } from "@/types/forms";
 
 const Patients = () => {
   const currentPatientId = "patient_123";
   
-  const [assignedForms] = useState([
+  const [assignedForms] = useState<(FormStructure & {
+    assignedDate: string;
+    assignedStatus: string;
+  })[]>([
     {
       id: "form_1",
       name: "Health Assessment Form",
@@ -17,29 +20,30 @@ const Patients = () => {
       fields: [
         {
           id: "name",
-          type: "text",
+          type: "text" as const,
           label: "Full Name",
           required: true,
           placeholder: "Enter your full name"
         },
         {
           id: "age",
-          type: "text",
+          type: "text" as const,
           label: "Age",
           required: true,
           placeholder: "Enter your age"
         },
         {
           id: "symptoms",
-          type: "textarea",
+          type: "textarea" as const,
           label: "Current Symptoms",
           required: true,
           placeholder: "Describe your current symptoms"
         },
         {
           id: "medication",
-          type: "select",
+          type: "select" as const,
           label: "Current Medications",
+          required: false,
           options: [
             { value: "none", label: "None" },
             { value: "prescribed", label: "Prescribed Medications" },
@@ -48,8 +52,9 @@ const Patients = () => {
         },
         {
           id: "exercise",
-          type: "radio",
+          type: "radio" as const,
           label: "Exercise Frequency",
+          required: false,
           options: [
             { value: "daily", label: "Daily" },
             { value: "weekly", label: "Weekly" },
@@ -59,11 +64,11 @@ const Patients = () => {
         },
         {
           id: "consent",
-          type: "checkbox",
+          type: "checkbox" as const,
           label: "I consent to treatment",
           required: true
         }
-      ],
+      ] as FormBuilderField[],
       status: "active" as const,
       created: "2024-01-15",
       lastModified: "2024-01-15",
