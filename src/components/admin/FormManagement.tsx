@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +30,7 @@ import FormBuilder from "./FormBuilder";
 import FormPreview from "./FormPreview";
 import PatientFormResponses from "./PatientFormResponses";
 import SendFormToPatientsDialog from "./SendFormToPatientsDialog";
+import FormResponseTracker from "./FormResponseTracker";
 import { FormStructure } from "@/types/forms";
 
 // Firebase imports
@@ -51,9 +51,11 @@ const FormManagement = () => {
   const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
   const [isSendToPatientsDialogOpen, setIsSendToPatientsDialogOpen] =
     useState(false);
+  const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
   const [selectedForm, setSelectedForm] = useState<FormStructure | null>(null);
   const [formToSend, setFormToSend] = useState<FormStructure | null>(null);
   const [previewForm, setPreviewForm] = useState<FormStructure | null>(null);
+  const [selectedFormForResponses, setSelectedFormForResponses] = useState<FormStructure | null>(null);
   const [activeTab, setActiveTab] = useState("forms");
 
   const [forms, setForms] = useState<FormStructure[]>([]);
@@ -146,6 +148,11 @@ const FormManagement = () => {
   const handleSendForm = (form: FormStructure) => {
     setFormToSend(form);
     setIsSendToPatientsDialogOpen(true);
+  };
+
+  const handleViewResponses = (form: FormStructure) => {
+    setSelectedFormForResponses(form);
+    setIsResponseDialogOpen(true);
   };
 
   const getFormResponses = (formId: string) => {
@@ -332,7 +339,12 @@ const FormManagement = () => {
                           <Send className="w-4 h-4 mr-1" />
                           Send to Patients
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewResponses(form)}
+                        >
+                          <Users className="w-4 h-4 mr-1" />
                           View Responses ({getFormResponses(form.id)})
                         </Button>
                       </div>
@@ -463,6 +475,24 @@ const FormManagement = () => {
           form={formToSend}
         />
       )}
+
+      {/* Form Responses Dialog */}
+      <Dialog open={isResponseDialogOpen} onOpenChange={setIsResponseDialogOpen}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Form Responses</DialogTitle>
+            <DialogDescription>
+              View all responses for "{selectedFormForResponses?.name}"
+            </DialogDescription>
+          </DialogHeader>
+          {selectedFormForResponses && (
+            <FormResponseTracker
+              formId={selectedFormForResponses.id}
+              formName={selectedFormForResponses.name}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
