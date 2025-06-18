@@ -793,7 +793,7 @@ const InventoryManagement = () => {
       ? "Failed to update product!"
       : "Failed to save product!";
 
-    const toastId = toast({
+    const loadingToast = toast({
       title: `${actionType} product...`,
       description: "Please wait.",
       variant: "default",
@@ -849,18 +849,16 @@ const InventoryManagement = () => {
       resetNewProduct();
 
       toast({
-        id: toastId.id,
         title: successMessage,
         description: `${productData.itemName} has been successfully ${
           isEditing ? "updated" : "added"
         }.`,
-        variant: "success",
+        variant: "default",
         duration: 2000,
       });
     } catch (error) {
       console.error(`Error ${actionType.toLowerCase()} product:`, error);
       toast({
-        id: toastId.id,
         title: "Error",
         description: errorMessage,
         variant: "destructive",
@@ -870,7 +868,7 @@ const InventoryManagement = () => {
   };
 
   const handleDeleteProduct = async (productId: string) => {
-    const toastId = toast({
+    const loadingToast = toast({
       title: "Deleting product...",
       description: "Please wait.",
       variant: "default",
@@ -882,16 +880,14 @@ const InventoryManagement = () => {
       setProducts((prev) => prev.filter((p) => p.id !== productId));
 
       toast({
-        id: toastId.id,
         title: "Product Deleted",
         description: "Product deleted successfully!",
-        variant: "success",
+        variant: "default",
         duration: 2000,
       });
     } catch (error) {
       console.error("Error deleting product:", error);
       toast({
-        id: toastId.id,
         title: "Error",
         description: "Failed to delete product.",
         variant: "destructive",
@@ -908,6 +904,11 @@ const InventoryManagement = () => {
   const handleCloseEditDialog = () => {
     setEditingProduct(null);
     setIsEditDialogOpen(false);
+  };
+
+  const handleCloseCreateDialog = () => {
+    setIsCreateDialogOpen(false);
+    resetNewProduct();
   };
 
   return (
@@ -950,7 +951,7 @@ const InventoryManagement = () => {
                         product={newProduct}
                         onChange={setNewProduct}
                         onSave={handleAddOrUpdateProduct}
-                        // onCancel={handleCloseCreateDialog}
+                        onCancel={handleCloseCreateDialog}
                         isEditing={false}
                       />
                     </DialogContent>
@@ -1062,7 +1063,9 @@ const InventoryManagement = () => {
           {editingProduct && (
             <ProductForm
               product={editingProduct}
-              onChange={setEditingProduct}
+              onChange={(updatedProduct) =>
+                setEditingProduct((prev) => ({ ...prev!, ...updatedProduct }))
+              }
               onSave={handleAddOrUpdateProduct}
               onCancel={handleCloseEditDialog}
               isEditing={true}
