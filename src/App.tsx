@@ -22,6 +22,8 @@ import Ayurveda from "./pages/knowledge/Ayurveda";
 import Homeopathy from "./pages/knowledge/Homeopathy";
 import Naturopathy from "./pages/knowledge/Naturopathy";
 import Signup from "./pages/Signup";
+import Patients from "./pages/Patients";
+import Wholesale from "./pages/Wholesale";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,8 @@ const App = () => (
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/patient-portal" element={<PatientPortal />} />
+            <Route path="/patients" element={<Patients />} />
+            <Route path="/wholesale" element={<Wholesale />} />
             <Route path="/about" element={<About />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/contact" element={<Contact />} />
