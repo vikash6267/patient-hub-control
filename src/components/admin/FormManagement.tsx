@@ -77,6 +77,7 @@ const FormManagement = () => {
         }));
         setForms(fetchedForms);
         setLoadingForms(false);
+        // console.log(fetchedForms, "test");
       },
       (error) => {
         console.error("Error fetching forms:", error);
@@ -217,7 +218,10 @@ const FormManagement = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
-              {forms.reduce((sum, form) => sum + getFormResponses(form.id), 0)}
+              {forms.reduce(
+                (sum, form) => sum + (form.responses?.length || 0),
+                0
+              )}
             </div>
           </CardContent>
         </Card>
@@ -295,7 +299,7 @@ const FormManagement = () => {
                         <div>
                           <span className="text-gray-500">Responses:</span>
                           <p className="font-medium">
-                            {getFormResponses(form.id)}
+                            <p>{form?.responses?.length || 0}</p>
                           </p>
                         </div>
                         <div>
@@ -346,7 +350,7 @@ const FormManagement = () => {
                           onClick={() => handleViewResponses(form)}
                         >
                           <Users className="w-4 h-4 mr-1" />
-                          View Responses
+                          View Responses {`( ${form?.responses?.length || 0} )`}
                         </Button>
                       </div>
                     </div>
