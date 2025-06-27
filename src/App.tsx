@@ -16,7 +16,8 @@ import NotFound from "./pages/NotFound";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
-
+import CallManager from "./ringcentral/components/calling/CallManager";
+import ActiveCallsPanel from "./ringcentral/components/calling/ActiveCallsPanel";
 // Knowledge System Pages
 import Ayurveda from "./pages/knowledge/Ayurveda";
 import Homeopathy from "./pages/knowledge/Homeopathy";
@@ -24,44 +25,59 @@ import Naturopathy from "./pages/knowledge/Naturopathy";
 import Signup from "./pages/Signup";
 import Patients from "./pages/Patients";
 import Wholesale from "./pages/Wholesale";
+import { useEffect } from "react";
+import { Layout as AntLayout, notification } from "antd";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <CartProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/payment" element={<Payment />} />
-            <Route path="/order-confirmation" element={<OrderConfirmation />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/patient-portal" element={<PatientPortal />} />
-            <Route path="/patients" element={<Patients />} />
-            <Route path="/wholesale" element={<Wholesale />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/signup" element={<Signup />} />
+const App = () => {
+  const [api, contextHolder] = notification.useNotification();
+  useEffect(() => {
+    globalThis.notifier = api;
+  }, [api]);
 
-            {/* Knowledge System Pages */}
-            <Route path="/knowledge/ayurveda" element={<Ayurveda />} />
-            <Route path="/knowledge/homeopathy" element={<Homeopathy />} />
-            <Route path="/knowledge/naturopathy" element={<Naturopathy />} />
+  return (
+    <QueryClientProvider client={queryClient}>
+      <CartProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/payment" element={<Payment />} />
+              <Route
+                path="/order-confirmation"
+                element={<OrderConfirmation />}
+              />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/patient-portal" element={<PatientPortal />} />
+              <Route path="/patients" element={<Patients />} />
+              <Route path="/wholesale" element={<Wholesale />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/signup" element={<Signup />} />
 
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </CartProvider>
-  </QueryClientProvider>
-);
+              {/* Knowledge System Pages */}
+              <Route path="/knowledge/ayurveda" element={<Ayurveda />} />
+              <Route path="/knowledge/homeopathy" element={<Homeopathy />} />
+              <Route path="/knowledge/naturopathy" element={<Naturopathy />} />
+
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </CartProvider>
+
+      <CallManager />
+      <ActiveCallsPanel />
+    </QueryClientProvider>
+  );
+};
 
 export default App;

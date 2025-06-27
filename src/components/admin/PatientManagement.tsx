@@ -59,6 +59,7 @@ import { toast } from "react-toastify";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
 import EditPatientDialog from "./EditPatientDialog";
+import CommunicationPanel from "@/pages/CommunicationPanel";
 
 interface Patient {
   id: string;
@@ -320,12 +321,13 @@ const PatientManagement = () => {
       </DialogHeader>
 
       <Tabs defaultValue="overview" className="mt-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="medical">Medical History</TabsTrigger>
           <TabsTrigger value="forms">Forms</TabsTrigger>
           <TabsTrigger value="appointments">Appointments</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
+          <TabsTrigger value="ring">RingCentral</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -429,6 +431,11 @@ const PatientManagement = () => {
             <p className="text-sm text-gray-600">
               No notes recorded for this patient.
             </p>
+          </div>
+        </TabsContent>
+        <TabsContent value="ring" className="space-y-4">
+          <div>
+            <CommunicationPanel patient={patient} />
           </div>
         </TabsContent>
       </Tabs>

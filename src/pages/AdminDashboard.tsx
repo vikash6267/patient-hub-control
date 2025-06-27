@@ -40,6 +40,7 @@ import AccountingModule from "@/components/admin/AccountingModule";
 import RingCentralIntegration from "@/components/admin/RingCentralIntegration";
 import ShipstationIntegration from "@/components/admin/ShipstationIntegration";
 import Wholesale from "./Wholesale";
+import CommunicationPanel from "./CommunicationPanel";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -380,9 +381,10 @@ const AdminDashboard = () => {
             <PatientManagement />
           </TabsContent>
 
-          <TabsContent value="communication">
+          {/* <TabsContent value="communication">
             <RingCentralIntegration />
-          </TabsContent>
+            <CommunicationPanel />
+          </TabsContent> */}
 
           <TabsContent value="marketing">
             <MarketingTools />
