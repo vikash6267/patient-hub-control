@@ -1,42 +1,41 @@
-"use client"
+import React from "react";
+import { useEffect, useState } from "react";
+import { Card, Typography, Empty } from "antd";
 
-import  React from "react"
-import { useEffect, useState } from "react"
-import { Card, Typography, Empty } from "antd"
+import { ringCentralStore } from "../../store/ringcentral";
+import CallSessionComponent from "./CallSession";
 
-import { ringCentralStore } from "../../store/ringcentral"
-import CallSessionComponent from "./CallSession"
-
-const { Title } = Typography
+const { Title } = Typography;
 
 const ActiveCallsPanel: React.FC = () => {
-  const [isVisible, setIsVisible] = useState(false)
-  const [activeCalls, setActiveCalls] = useState(ringCentralStore.activeCalls || [])
-  const [isConnected, setIsConnected] = useState(false)
+  const [isVisible, setIsVisible] = useState(false);
+  const [activeCalls, setActiveCalls] = useState(
+    ringCentralStore.activeCalls || []
+  );
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     const updateStatus = () => {
-      const connected = ringCentralStore.isConnected
-      const calls = ringCentralStore.activeCalls || []
+      const connected = ringCentralStore.isConnected;
+      const calls = ringCentralStore.activeCalls || [];
 
-      setIsConnected(connected)
-      setActiveCalls(calls)
-      setIsVisible(connected && calls.length > 0)
+      setIsConnected(connected);
+      setActiveCalls(calls);
+      setIsVisible(connected && calls.length > 0);
+    };
 
-    }
-
-    updateStatus()
-    const unsubscribe = ringCentralStore.subscribe(updateStatus)
-    const interval = setInterval(updateStatus, 1000)
+    updateStatus();
+    const unsubscribe = ringCentralStore.subscribe(updateStatus);
+    const interval = setInterval(updateStatus, 1000);
 
     return () => {
-      unsubscribe()
-      clearInterval(interval)
-    }
-  }, [])
+      unsubscribe();
+      clearInterval(interval);
+    };
+  }, []);
 
   if (!isVisible) {
-    return null
+    return null;
   }
 
   return (
@@ -64,7 +63,10 @@ const ActiveCallsPanel: React.FC = () => {
       >
         {activeCalls.length > 0 ? (
           activeCalls.map((callSession, index) => (
-            <div key={callSession.callId || index} style={{ marginBottom: index < activeCalls.length - 1 ? 16 : 0 }}>
+            <div
+              key={callSession.callId || index}
+              style={{ marginBottom: index < activeCalls.length - 1 ? 16 : 0 }}
+            >
               <CallSessionComponent callSession={callSession} />
             </div>
           ))
@@ -73,7 +75,7 @@ const ActiveCallsPanel: React.FC = () => {
         )}
       </Card>
     </div>
-  )
-}
+  );
+};
 
-export default ActiveCallsPanel
+export default ActiveCallsPanel;

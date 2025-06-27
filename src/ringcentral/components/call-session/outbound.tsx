@@ -1,13 +1,11 @@
-"use client"
+import { Space, Tag } from "antd";
+import { auto } from "manate/react";
+import type OutboundCallSession from "ringcentral-web-phone/call-session/outbound";
 
-import { Space, Tag } from "antd"
-import { auto } from "manate/react"
-import type OutboundCallSession from "ringcentral-web-phone/call-session/outbound"
-
-import AnsweredSession from "./answered"
+import AnsweredSession from "./answered";
 
 const OutboundSession = auto((props: { session: OutboundCallSession }) => {
-  const { session } = props
+  const { session } = props;
 
   return (
     <Space direction="vertical">
@@ -19,7 +17,7 @@ const OutboundSession = auto((props: { session: OutboundCallSession }) => {
       </Space>
       {session.state === "answered" && <AnsweredSession session={session} />}
     </Space>
-  )
-})
+  );
+});
 
-export default OutboundSession
+export default OutboundSession;

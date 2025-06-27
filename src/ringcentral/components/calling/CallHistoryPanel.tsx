@@ -1,7 +1,5 @@
-"use client"
-
-import  React from "react"
-import { useState, useEffect, useRef } from "react"
+import React from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   List,
@@ -16,7 +14,7 @@ import {
   Divider,
   Modal,
   Descriptions,
-} from "antd"
+} from "antd";
 import {
   PhoneIncoming,
   PhoneOutgoing,
@@ -28,128 +26,144 @@ import {
   FileAudio,
   MapPin,
   DollarSign,
-} from "lucide-react"
+} from "lucide-react";
 
-import { ringCentralStore, type CallHistoryRecord } from "../../store/ringcentral"
+import {
+  ringCentralStore,
+  type CallHistoryRecord,
+} from "../../store/ringcentral";
 
-const { Text, Title } = Typography
+const { Text, Title } = Typography;
 
 interface Props {
-  patientPhone?: string
-  showAll?: boolean
+  patientPhone?: string;
+  showAll?: boolean;
 }
 
-const CallHistoryPanel: React.FC<Props> = ({ patientPhone, showAll = false }) => {
-  const [callHistory, setCallHistory] = useState<CallHistoryRecord[]>([])
-  const [loading, setLoading] = useState(false)
-  const [hasMore, setHasMore] = useState(true)
-  const [selectedCall, setSelectedCall] = useState<CallHistoryRecord | null>(null)
-  const [detailsModalVisible, setDetailsModalVisible] = useState(false)
-  const listRef = useRef<HTMLDivElement>(null)
+const CallHistoryPanel: React.FC<Props> = ({
+  patientPhone,
+  showAll = false,
+}) => {
+  const [callHistory, setCallHistory] = useState<CallHistoryRecord[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [selectedCall, setSelectedCall] = useState<CallHistoryRecord | null>(
+    null
+  );
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const updateCallHistory = () => {
       if (patientPhone && !showAll) {
         // Filter for specific patient
-        const filtered = ringCentralStore.getCallHistoryForNumber(patientPhone)
-        setCallHistory(filtered)
+        const filtered = ringCentralStore.getCallHistoryForNumber(patientPhone);
+        setCallHistory(filtered);
       } else {
         // Show all call history
-        setCallHistory(ringCentralStore.callHistory)
+        setCallHistory(ringCentralStore.callHistory);
       }
 
-      setLoading(ringCentralStore.callHistoryLoading)
-      setHasMore(ringCentralStore.hasMoreCallHistory)
-    }
+      setLoading(ringCentralStore.callHistoryLoading);
+      setHasMore(ringCentralStore.hasMoreCallHistory);
+    };
 
-    updateCallHistory()
-    const unsubscribe = ringCentralStore.subscribe(updateCallHistory)
+    updateCallHistory();
+    const unsubscribe = ringCentralStore.subscribe(updateCallHistory);
 
     return () => {
-      unsubscribe()
-    }
-  }, [patientPhone, showAll])
+      unsubscribe();
+    };
+  }, [patientPhone, showAll]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
 
     // Load more when scrolled to 80% of the content
     if (scrollHeight - scrollTop <= clientHeight * 1.2 && hasMore && !loading) {
-      ringCentralStore.loadMoreCallHistory()
+      ringCentralStore.loadMoreCallHistory();
     }
-  }
+  };
 
   const handleRefresh = () => {
-    ringCentralStore.refreshCallHistory()
-  }
+    ringCentralStore.refreshCallHistory();
+  };
 
   const formatDuration = (seconds: number) => {
-    if (seconds === 0) return "0s"
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`
-  }
+    if (seconds === 0) return "0s";
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+  };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffTime = now.getTime() - date.getTime()
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) {
-      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     } else if (diffDays === 1) {
-      return "Yesterday"
+      return "Yesterday";
     } else if (diffDays < 7) {
-      return `${diffDays} days ago`
+      return `${diffDays} days ago`;
     } else {
-      return date.toLocaleDateString()
+      return date.toLocaleDateString();
     }
-  }
+  };
 
   const getCallIcon = (call: CallHistoryRecord) => {
     if (call.result === "Missed") {
-      return <PhoneMissed size={16} style={{ color: "#ff4d4f" }} />
+      return <PhoneMissed size={16} style={{ color: "#ff4d4f" }} />;
     } else if (call.direction === "Inbound") {
-      return <PhoneIncoming size={16} style={{ color: "#52c41a" }} />
+      return <PhoneIncoming size={16} style={{ color: "#52c41a" }} />;
     } else {
-      return <PhoneOutgoing size={16} style={{ color: "#1890ff" }} />
+      return <PhoneOutgoing size={16} style={{ color: "#1890ff" }} />;
     }
-  }
+  };
 
   const getCallStatusColor = (result: string) => {
     switch (result) {
       case "Completed":
-        return "green"
+        return "green";
       case "Missed":
-        return "red"
+        return "red";
       case "Voicemail":
-        return "orange"
+        return "orange";
       case "Busy":
-        return "volcano"
+        return "volcano";
       case "No Answer":
-        return "gold"
+        return "gold";
       default:
-        return "default"
+        return "default";
     }
-  }
+  };
 
   const handleDownloadRecording = async (recordingId: string) => {
-    const url = await ringCentralStore.downloadRecording(recordingId)
+    const url = await ringCentralStore.downloadRecording(recordingId);
     if (url) {
-      window.open(url, "_blank")
+      window.open(url, "_blank");
     }
-  }
+  };
 
   const showCallDetails = (call: CallHistoryRecord) => {
-    setSelectedCall(call)
-    setDetailsModalVisible(true)
-  }
+    setSelectedCall(call);
+    setDetailsModalVisible(true);
+  };
 
   const renderCallItem = (call: CallHistoryRecord) => {
-    const phoneNumber = call.direction === "Inbound" ? call.from?.phoneNumber : call.to?.phoneNumber
-    const contactName = call.direction === "Inbound" ? call.from?.name : call.to?.name
-    const location = call.direction === "Inbound" ? call.from?.location : call.to?.location
+    const phoneNumber =
+      call.direction === "Inbound"
+        ? call.from?.phoneNumber
+        : call.to?.phoneNumber;
+    const contactName =
+      call.direction === "Inbound" ? call.from?.name : call.to?.name;
+    const location =
+      call.direction === "Inbound" ? call.from?.location : call.to?.location;
 
     return (
       <List.Item
@@ -171,8 +185,8 @@ const CallHistoryPanel: React.FC<Props> = ({ patientPhone, showAll = false }) =>
                 size="small"
                 icon={<Download size={14} />}
                 onClick={(e) => {
-                  e.stopPropagation()
-                  handleDownloadRecording(call.recording!.id)
+                  e.stopPropagation();
+                  handleDownloadRecording(call.recording!.id);
                 }}
               />
             </Tooltip>
@@ -223,8 +237,14 @@ const CallHistoryPanel: React.FC<Props> = ({ patientPhone, showAll = false }) =>
               {call.recording && (
                 <Space>
                   <FileAudio size={12} style={{ color: "#ff4d4f" }} />
-                  <Text type="secondary" style={{ fontSize: "12px", color: "#ff4d4f" }}>
-                    Recording: {call.recording.duration ? formatDuration(call.recording.duration) : "Available"}
+                  <Text
+                    type="secondary"
+                    style={{ fontSize: "12px", color: "#ff4d4f" }}
+                  >
+                    Recording:{" "}
+                    {call.recording.duration
+                      ? formatDuration(call.recording.duration)
+                      : "Available"}
                   </Text>
                 </Space>
               )}
@@ -251,8 +271,8 @@ const CallHistoryPanel: React.FC<Props> = ({ patientPhone, showAll = false }) =>
           }
         />
       </List.Item>
-    )
-  }
+    );
+  };
 
   return (
     <>
@@ -261,16 +281,31 @@ const CallHistoryPanel: React.FC<Props> = ({ patientPhone, showAll = false }) =>
           <Space>
             <Clock size={16} />
             <span>{showAll ? "All Call History" : "Call History"}</span>
-            {callHistory.length > 0 && <Badge count={callHistory.length} style={{ backgroundColor: "#52c41a" }} />}
+            {callHistory.length > 0 && (
+              <Badge
+                count={callHistory.length}
+                style={{ backgroundColor: "#52c41a" }}
+              />
+            )}
           </Space>
         }
         extra={
-          <Button type="text" icon={<RefreshCw size={14} />} onClick={handleRefresh} loading={loading} size="small">
+          <Button
+            type="text"
+            icon={<RefreshCw size={14} />}
+            onClick={handleRefresh}
+            loading={loading}
+            size="small"
+          >
             Refresh
           </Button>
         }
         style={{ height: showAll ? "70vh" : "400px" }}
-        bodyStyle={{ padding: 0, height: "calc(100% - 57px)", overflow: "hidden" }}
+        bodyStyle={{
+          padding: 0,
+          height: "calc(100% - 57px)",
+          overflow: "hidden",
+        }}
       >
         <div
           ref={listRef}
@@ -283,7 +318,11 @@ const CallHistoryPanel: React.FC<Props> = ({ patientPhone, showAll = false }) =>
         >
           {callHistory.length > 0 ? (
             <>
-              <List dataSource={callHistory} renderItem={renderCallItem} split={false} />
+              <List
+                dataSource={callHistory}
+                renderItem={renderCallItem}
+                split={false}
+              />
 
               {loading && (
                 <div style={{ textAlign: "center", padding: "16px" }}>
@@ -330,7 +369,7 @@ const CallHistoryPanel: React.FC<Props> = ({ patientPhone, showAll = false }) =>
               icon={<Download size={14} />}
               onClick={() => {
                 if (selectedCall?.recording) {
-                  handleDownloadRecording(selectedCall.recording.id)
+                  handleDownloadRecording(selectedCall.recording.id);
                 }
               }}
             >
@@ -352,13 +391,17 @@ const CallHistoryPanel: React.FC<Props> = ({ patientPhone, showAll = false }) =>
               </Space>
             </Descriptions.Item>
             <Descriptions.Item label="Status" span={1}>
-              <Tag color={getCallStatusColor(selectedCall.result)}>{selectedCall.result}</Tag>
+              <Tag color={getCallStatusColor(selectedCall.result)}>
+                {selectedCall.result}
+              </Tag>
             </Descriptions.Item>
 
             <Descriptions.Item label="From" span={1}>
               <Space direction="vertical" size="small">
                 <Text>{selectedCall.from?.phoneNumber || "Unknown"}</Text>
-                {selectedCall.from?.name && <Text type="secondary">{selectedCall.from.name}</Text>}
+                {selectedCall.from?.name && (
+                  <Text type="secondary">{selectedCall.from.name}</Text>
+                )}
                 {selectedCall.from?.location && (
                   <Text type="secondary" style={{ fontSize: "12px" }}>
                     📍 {selectedCall.from.location}
@@ -370,7 +413,9 @@ const CallHistoryPanel: React.FC<Props> = ({ patientPhone, showAll = false }) =>
             <Descriptions.Item label="To" span={1}>
               <Space direction="vertical" size="small">
                 <Text>{selectedCall.to?.phoneNumber || "Unknown"}</Text>
-                {selectedCall.to?.name && <Text type="secondary">{selectedCall.to.name}</Text>}
+                {selectedCall.to?.name && (
+                  <Text type="secondary">{selectedCall.to.name}</Text>
+                )}
                 {selectedCall.to?.location && (
                   <Text type="secondary" style={{ fontSize: "12px" }}>
                     📍 {selectedCall.to.location}
@@ -416,7 +461,10 @@ const CallHistoryPanel: React.FC<Props> = ({ patientPhone, showAll = false }) =>
                       <Tag color="red">{selectedCall.recording.type}</Tag>
                     </Space>
                     {selectedCall.recording.duration && (
-                      <Text type="secondary">Duration: {formatDuration(selectedCall.recording.duration)}</Text>
+                      <Text type="secondary">
+                        Duration:{" "}
+                        {formatDuration(selectedCall.recording.duration)}
+                      </Text>
                     )}
                   </Space>
                 </Descriptions.Item>
@@ -427,8 +475,14 @@ const CallHistoryPanel: React.FC<Props> = ({ patientPhone, showAll = false }) =>
               <Descriptions.Item label="Billing" span={2}>
                 <Space>
                   <DollarSign size={14} />
-                  {selectedCall.billing.costIncluded && <Text>Included: ${selectedCall.billing.costIncluded}</Text>}
-                  {selectedCall.billing.costPurchased && <Text>Purchased: ${selectedCall.billing.costPurchased}</Text>}
+                  {selectedCall.billing.costIncluded && (
+                    <Text>Included: ${selectedCall.billing.costIncluded}</Text>
+                  )}
+                  {selectedCall.billing.costPurchased && (
+                    <Text>
+                      Purchased: ${selectedCall.billing.costPurchased}
+                    </Text>
+                  )}
                 </Space>
               </Descriptions.Item>
             )}
@@ -442,7 +496,7 @@ const CallHistoryPanel: React.FC<Props> = ({ patientPhone, showAll = false }) =>
         )}
       </Modal>
     </>
-  )
-}
+  );
+};
 
-export default CallHistoryPanel
+export default CallHistoryPanel;

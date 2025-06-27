@@ -1,8 +1,19 @@
-"use client"
-
-import  React from "react"
-import { useState, useEffect } from "react"
-import { Card, Button, Space, Typography, Divider, Badge, Alert, Spin, Statistic, Row, Col, Tabs } from "antd"
+import React from "react";
+import { useState, useEffect } from "react";
+import {
+  Card,
+  Button,
+  Space,
+  Typography,
+  Divider,
+  Badge,
+  Alert,
+  Spin,
+  Statistic,
+  Row,
+  Col,
+  Tabs,
+} from "antd";
 import {
   Phone,
   MessageCircle,
@@ -15,130 +26,142 @@ import {
   Bug,
   FileAudio,
   History,
-} from "lucide-react"
+} from "lucide-react";
 
-import { ringCentralStore } from "../../store/ringcentral"
-import type { Patient } from "../../types"
-import CallHistoryPanel from "./CallHistoryPanel"
+import { ringCentralStore } from "../../store/ringcentral";
+import type { Patient } from "../../types";
+import CallHistoryPanel from "./CallHistoryPanel";
 
-const { Title, Text } = Typography
-const { TabPane } = Tabs
+const { Title, Text } = Typography;
+const { TabPane } = Tabs;
 
 interface Props {
-  patient: Patient
+  patient: Patient;
 }
 
 const CommunicationPanel: React.FC<Props> = ({ patient }) => {
-  const [isCallInProgress, setIsCallInProgress] = useState(false)
-  const [isConnected, setIsConnected] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [activeCalls, setActiveCalls] = useState([])
-  const [tokenExpiry, setTokenExpiry] = useState("Not logged in")
-  const [callStats, setCallStats] = useState({ total: 0, incoming: 0, outgoing: 0, missed: 0, withRecording: 0 })
-  const [initComplete, setInitComplete] = useState(false)
+  const [isCallInProgress, setIsCallInProgress] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [activeCalls, setActiveCalls] = useState([]);
+  const [tokenExpiry, setTokenExpiry] = useState("Not logged in");
+  const [callStats, setCallStats] = useState({
+    total: 0,
+    incoming: 0,
+    outgoing: 0,
+    missed: 0,
+    withRecording: 0,
+  });
+  const [initComplete, setInitComplete] = useState(false);
 
   useEffect(() => {
     const updateStatus = () => {
-      const newIsLoggedIn = ringCentralStore.isLoggedIn
-      const newIsConnected = ringCentralStore.isConnected
+      const newIsLoggedIn = ringCentralStore.isLoggedIn;
+      const newIsConnected = ringCentralStore.isConnected;
 
-      console.log("🔄 CommunicationPanel state update:")
-      console.log("  - isLoggedIn:", newIsLoggedIn)
-      console.log("  - isConnected:", newIsConnected)
-      console.log("  - initComplete:", ringCentralStore.initializationComplete)
+      console.log("🔄 CommunicationPanel state update:");
+      console.log("  - isLoggedIn:", newIsLoggedIn);
+      console.log("  - isConnected:", newIsConnected);
+      console.log("  - initComplete:", ringCentralStore.initializationComplete);
 
-      setIsConnected(newIsConnected)
-      setIsLoggedIn(newIsLoggedIn)
-      setActiveCalls(ringCentralStore.activeCalls || [])
-      setTokenExpiry(ringCentralStore.tokenExpiryFormatted)
-      setCallStats(ringCentralStore.getCallStats())
-      setInitComplete(ringCentralStore.initializationComplete)
-    }
+      setIsConnected(newIsConnected);
+      setIsLoggedIn(newIsLoggedIn);
+      setActiveCalls(ringCentralStore.activeCalls || []);
+      setTokenExpiry(ringCentralStore.tokenExpiryFormatted);
+      setCallStats(ringCentralStore.getCallStats());
+      setInitComplete(ringCentralStore.initializationComplete);
+    };
 
-    updateStatus()
-    const unsubscribe = ringCentralStore.subscribe(updateStatus)
-    const interval = setInterval(updateStatus, 1000)
+    updateStatus();
+    const unsubscribe = ringCentralStore.subscribe(updateStatus);
+    const interval = setInterval(updateStatus, 1000);
 
     return () => {
-      unsubscribe()
-      clearInterval(interval)
-    }
-  }, [])
+      unsubscribe();
+      clearInterval(interval);
+    };
+  }, []);
 
   const handleVoiceCall = async () => {
-    console.log("📞 Voice call button clicked")
-    console.log("  - isLoggedIn:", isLoggedIn)
-    console.log("  - isConnected:", isConnected)
+    console.log("📞 Voice call button clicked");
+    console.log("  - isLoggedIn:", isLoggedIn);
+    console.log("  - isConnected:", isConnected);
 
     if (!isLoggedIn) {
       globalThis.notifier?.error({
         message: "Not Logged In",
-        description: "Please click 'Login & Connect' in the header to start making calls",
-      })
-      return
+        description:
+          "Please click 'Login & Connect' in the header to start making calls",
+      });
+      return;
     }
 
     if (!isConnected) {
       globalThis.notifier?.error({
         message: "Not Connected",
         description: "Please connect to RingCentral first",
-      })
-      return
+      });
+      return;
     }
 
     if (isCallInProgress) {
       globalThis.notifier?.warning({
         message: "Call in Progress",
         description: "Please wait for the current call to complete",
-      })
-      return
+      });
+      return;
     }
 
     try {
-      setIsCallInProgress(true)
+      setIsCallInProgress(true);
 
       globalThis.notifier?.info({
         message: "Initiating Call...",
         description: `Calling ${patient.name} at ${patient.phone}`,
-      })
+      });
 
-      console.log("📞 Starting call to:", patient.phone, "for patient:", patient.name)
-      await ringCentralStore.makeCall(patient.phone, patient.name)
+      console.log(
+        "📞 Starting call to:",
+        patient.phone,
+        "for patient:",
+        patient.name
+      );
+      await ringCentralStore.makeCall(patient.phone, patient.name);
 
       setTimeout(() => {
-        setIsCallInProgress(false)
-      }, 3000)
+        setIsCallInProgress(false);
+      }, 3000);
     } catch (error) {
-      console.error("❌ Call initiation failed:", error)
-      setIsCallInProgress(false)
+      console.error("❌ Call initiation failed:", error);
+      setIsCallInProgress(false);
       globalThis.notifier?.error({
         message: "Call Failed",
         description: "Failed to initiate call. Please try again.",
-      })
+      });
     }
-  }
+  };
 
   const handleVideoCall = () => {
     globalThis.notifier?.info({
       message: "Video Call",
       description: "Video calling feature coming soon!",
-    })
-  }
+    });
+  };
 
   const handleMessage = () => {
     globalThis.notifier?.info({
       message: "Messaging",
       description: "Messaging feature coming soon!",
-    })
-  }
+    });
+  };
 
   const handleDebug = () => {
-    ringCentralStore.debugState()
+    ringCentralStore.debugState();
     globalThis.notifier?.info({
       message: "Debug Info",
       description: "Check console for detailed state information",
-    })
-  }
+    });
+  };
 
   // Show loading state during initialization
   if (!initComplete) {
@@ -151,49 +174,75 @@ const CommunicationPanel: React.FC<Props> = ({ patient }) => {
           </div>
         </div>
       </Card>
-    )
+    );
   }
 
   // Check for active call with this patient
   const activeCall = activeCalls.find((session) => {
-    const sessionPhone = session.remoteNumber.replace(/\D/g, "")
-    const patientPhone = patient.phone.replace(/\D/g, "")
-    return sessionPhone.includes(patientPhone) || patientPhone.includes(sessionPhone)
-  })
+    const sessionPhone = session.remoteNumber.replace(/\D/g, "");
+    const patientPhone = patient.phone.replace(/\D/g, "");
+    return (
+      sessionPhone.includes(patientPhone) || patientPhone.includes(sessionPhone)
+    );
+  });
 
-  const hasActiveCalls = activeCalls.length > 0
+  const hasActiveCalls = activeCalls.length > 0;
 
   // Get call statistics for this patient
-  const patientCallHistory = ringCentralStore.getCallHistoryForNumber(patient.phone)
+  const patientCallHistory = ringCentralStore.getCallHistoryForNumber(
+    patient.phone
+  );
   const patientStats = {
     total: patientCallHistory.length,
-    incoming: patientCallHistory.filter((c) => c.direction === "Inbound").length,
-    outgoing: patientCallHistory.filter((c) => c.direction === "Outbound").length,
+    incoming: patientCallHistory.filter((c) => c.direction === "Inbound")
+      .length,
+    outgoing: patientCallHistory.filter((c) => c.direction === "Outbound")
+      .length,
     missed: patientCallHistory.filter((c) => c.result === "Missed").length,
     withRecording: patientCallHistory.filter((c) => !!c.recording).length,
-  }
+  };
 
   return (
     <Card
       title="Communication"
       extra={
-        <Button size="small" icon={<Bug size={14} />} onClick={handleDebug} type="text">
+        <Button
+          size="small"
+          icon={<Bug size={14} />}
+          onClick={handleDebug}
+          type="text"
+        >
           Debug
         </Button>
       }
     >
       <Space direction="vertical" style={{ width: "100%" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Title level={5}>Contact {patient.name}</Title>
           {activeCall && <Badge status="processing" text="Active Call" />}
-          {hasActiveCalls && !activeCall && <Badge count={activeCalls.length} />}
+          {hasActiveCalls && !activeCall && (
+            <Badge count={activeCalls.length} />
+          )}
         </div>
 
         {/* Debug Info */}
-        <div style={{ background: "#f5f5f5", padding: "8px", borderRadius: "4px", fontSize: "12px" }}>
+        <div
+          style={{
+            background: "#f5f5f5",
+            padding: "8px",
+            borderRadius: "4px",
+            fontSize: "12px",
+          }}
+        >
           <Text type="secondary">
-            Debug: Logged In: {isLoggedIn ? "✅" : "❌"} | Connected: {isConnected ? "✅" : "❌"} | Init:{" "}
-            {initComplete ? "✅" : "❌"}
+            Debug: Logged In: {isLoggedIn ? "✅" : "❌"} | Connected:{" "}
+            {isConnected ? "✅" : "❌"} | Init: {initComplete ? "✅" : "❌"}
           </Text>
         </div>
 
@@ -242,14 +291,22 @@ const CommunicationPanel: React.FC<Props> = ({ patient }) => {
         <Space direction="vertical" style={{ width: "100%" }}>
           <Button
             type="primary"
-            icon={isCallInProgress ? <Spin size="small" /> : <Phone size={16} />}
+            icon={
+              isCallInProgress ? <Spin size="small" /> : <Phone size={16} />
+            }
             onClick={handleVoiceCall}
-            disabled={!isLoggedIn || !isConnected || !!activeCall || isCallInProgress}
+            disabled={
+              !isLoggedIn || !isConnected || !!activeCall || isCallInProgress
+            }
             block
             size="large"
             loading={isCallInProgress}
           >
-            {isCallInProgress ? "Calling..." : activeCall ? "Call in Progress" : "Voice Call"}
+            {isCallInProgress
+              ? "Calling..."
+              : activeCall
+              ? "Call in Progress"
+              : "Voice Call"}
           </Button>
 
           <Button
@@ -257,12 +314,20 @@ const CommunicationPanel: React.FC<Props> = ({ patient }) => {
             onClick={handleVideoCall}
             block
             size="large"
-            disabled={!isLoggedIn || !isConnected || !!activeCall || isCallInProgress}
+            disabled={
+              !isLoggedIn || !isConnected || !!activeCall || isCallInProgress
+            }
           >
             Video Call
           </Button>
 
-          <Button icon={<MessageCircle size={16} />} onClick={handleMessage} block size="large" disabled={!isLoggedIn}>
+          <Button
+            icon={<MessageCircle size={16} />}
+            onClick={handleMessage}
+            block
+            size="large"
+            disabled={!isLoggedIn}
+          >
             Send Message
           </Button>
         </Space>
@@ -271,12 +336,27 @@ const CommunicationPanel: React.FC<Props> = ({ patient }) => {
         <div style={{ textAlign: "center", padding: "8px" }}>
           <Space direction="vertical" size="small">
             <Badge
-              status={isConnected ? "success" : isLoggedIn ? "warning" : "error"}
-              text={isConnected ? "RingCentral Connected" : isLoggedIn ? "Logged In (Disconnected)" : "Not Logged In"}
+              status={
+                isConnected ? "success" : isLoggedIn ? "warning" : "error"
+              }
+              text={
+                isConnected
+                  ? "RingCentral Connected"
+                  : isLoggedIn
+                  ? "Logged In (Disconnected)"
+                  : "Not Logged In"
+              }
             />
 
             {isLoggedIn && (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "4px",
+                }}
+              >
                 <Clock size={12} />
                 <Text type="secondary" style={{ fontSize: "11px" }}>
                   {tokenExpiry}
@@ -285,7 +365,10 @@ const CommunicationPanel: React.FC<Props> = ({ patient }) => {
             )}
 
             {hasActiveCalls && (
-              <Badge count={activeCalls.length} style={{ backgroundColor: "#52c41a" }}>
+              <Badge
+                count={activeCalls.length}
+                style={{ backgroundColor: "#52c41a" }}
+              >
                 <Text>Active Calls</Text>
               </Badge>
             )}
@@ -362,7 +445,11 @@ const CommunicationPanel: React.FC<Props> = ({ patient }) => {
               <Title level={5}>Overall Statistics</Title>
               <Row gutter={16}>
                 <Col span={6}>
-                  <Statistic title="Total Calls" value={callStats.total} valueStyle={{ fontSize: "14px" }} />
+                  <Statistic
+                    title="Total Calls"
+                    value={callStats.total}
+                    valueStyle={{ fontSize: "14px" }}
+                  />
                 </Col>
                 <Col span={6}>
                   <Statistic
@@ -409,7 +496,9 @@ const CommunicationPanel: React.FC<Props> = ({ patient }) => {
               <Space>
                 <History size={14} />
                 Call History
-                {patientStats.total > 0 && <Badge count={patientStats.total} size="small" />}
+                {patientStats.total > 0 && (
+                  <Badge count={patientStats.total} size="small" />
+                )}
               </Space>
             }
             key="history"
@@ -430,7 +519,12 @@ const CommunicationPanel: React.FC<Props> = ({ patient }) => {
             <Button
               size="small"
               icon={<Phone size={14} />}
-              onClick={() => ringCentralStore.makeCall(patient.emergencyContact.phone, patient.emergencyContact.name)}
+              onClick={() =>
+                ringCentralStore.makeCall(
+                  patient.emergencyContact.phone,
+                  patient.emergencyContact.name
+                )
+              }
               disabled={!isLoggedIn || !isConnected || isCallInProgress}
               danger
             >
@@ -440,7 +534,7 @@ const CommunicationPanel: React.FC<Props> = ({ patient }) => {
         </div>
       </Space>
     </Card>
-  )
-}
+  );
+};
 
-export default CommunicationPanel
+export default CommunicationPanel;

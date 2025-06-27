@@ -1,13 +1,11 @@
-"use client"
+import { Button, Space, Tag } from "antd";
+import { auto } from "manate/react";
+import type InboundCallSession from "ringcentral-web-phone/call-session/inbound";
 
-import { Button, Space, Tag } from "antd"
-import { auto } from "manate/react"
-import type InboundCallSession from "ringcentral-web-phone/call-session/inbound"
-
-import AnsweredSession from "./answered"
+import AnsweredSession from "./answered";
 
 const InboundSession = auto((props: { session: InboundCallSession }) => {
-  const { session } = props
+  const { session } = props;
 
   return (
     <Space direction="vertical">
@@ -29,7 +27,7 @@ const InboundSession = auto((props: { session: InboundCallSession }) => {
       )}
       {session.state === "answered" && <AnsweredSession session={session} />}
     </Space>
-  )
-})
+  );
+});
 
-export default InboundSession
+export default InboundSession;

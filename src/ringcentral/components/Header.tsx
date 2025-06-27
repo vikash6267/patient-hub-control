@@ -1,57 +1,64 @@
-"use client"
-import React from 'react'
-import { useState, useEffect } from "react"
-import { Badge, Button, Space, Typography, Dropdown, Tooltip, Spin } from "antd"
-import { Phone, PhoneOff, LogOut, Clock } from "lucide-react"
+import React from "react";
+import { useState, useEffect } from "react";
+import {
+  Badge,
+  Button,
+  Space,
+  Typography,
+  Dropdown,
+  Tooltip,
+  Spin,
+} from "antd";
+import { Phone, PhoneOff, LogOut, Clock } from "lucide-react";
 
-import { ringCentralStore } from "../store/ringcentral"
+import { ringCentralStore } from "../store/ringcentral";
 
-const { Title, Text } = Typography
+const { Title, Text } = Typography;
 
 const Header = () => {
-  const [isConnected, setIsConnected] = useState(false)
-  const [isConnecting, setIsConnecting] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [tokenExpiry, setTokenExpiry] = useState("Not logged in")
-  const [extInfo, setExtInfo] = useState(null)
-  const [initComplete, setInitComplete] = useState(false)
+  const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [tokenExpiry, setTokenExpiry] = useState("Not logged in");
+  const [extInfo, setExtInfo] = useState(null);
+  const [initComplete, setInitComplete] = useState(false);
 
   useEffect(() => {
     const updateStatus = () => {
-      setIsConnected(ringCentralStore.isConnected)
-      setIsConnecting(ringCentralStore.isConnecting)
-      setIsLoggedIn(ringCentralStore.isLoggedIn)
-      setTokenExpiry(ringCentralStore.tokenExpiryFormatted)
-      setExtInfo(ringCentralStore.extInfo)
-      setInitComplete(ringCentralStore.initializationComplete)
-    }
+      setIsConnected(ringCentralStore.isConnected);
+      setIsConnecting(ringCentralStore.isConnecting);
+      setIsLoggedIn(ringCentralStore.isLoggedIn);
+      setTokenExpiry(ringCentralStore.tokenExpiryFormatted);
+      setExtInfo(ringCentralStore.extInfo);
+      setInitComplete(ringCentralStore.initializationComplete);
+    };
 
     // Initial update
-    updateStatus()
+    updateStatus();
 
     // Subscribe to store changes
-    const unsubscribe = ringCentralStore.subscribe(updateStatus)
+    const unsubscribe = ringCentralStore.subscribe(updateStatus);
 
     // Also update every second for token expiry
-    const interval = setInterval(updateStatus, 1000)
+    const interval = setInterval(updateStatus, 1000);
 
     return () => {
-      unsubscribe()
-      clearInterval(interval)
-    }
-  }, [])
+      unsubscribe();
+      clearInterval(interval);
+    };
+  }, []);
 
   const handleConnect = () => {
-    ringCentralStore.connect()
-  }
+    ringCentralStore.connect();
+  };
 
   const handleDisconnect = () => {
-    ringCentralStore.disconnect()
-  }
+    ringCentralStore.disconnect();
+  };
 
   const handleLogout = () => {
-    ringCentralStore.logout()
-  }
+    ringCentralStore.logout();
+  };
 
   const dropdownItems = [
     {
@@ -88,14 +95,21 @@ const Header = () => {
     {
       key: "logout",
       label: (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#ff4d4f" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            color: "#ff4d4f",
+          }}
+        >
           <LogOut size={14} />
           <span>Logout</span>
         </div>
       ),
       onClick: handleLogout,
     },
-  ]
+  ];
 
   // Show loading state during initialization
   if (!initComplete) {
@@ -118,7 +132,7 @@ const Header = () => {
           <Text style={{ color: "white" }}>Initializing...</Text>
         </Space>
       </div>
-    )
+    );
   }
 
   return (
@@ -142,7 +156,11 @@ const Header = () => {
           status={isConnected ? "success" : isLoggedIn ? "warning" : "error"}
           text={
             <span style={{ color: "white" }}>
-              {isConnected ? "Connected" : isLoggedIn ? "Logged In" : "Disconnected"}
+              {isConnected
+                ? "Connected"
+                : isLoggedIn
+                ? "Logged In"
+                : "Disconnected"}
             </span>
           }
         />
@@ -161,16 +179,30 @@ const Header = () => {
         {/* Connect/Disconnect Button */}
         {isLoggedIn ? (
           isConnected ? (
-            <Button icon={<PhoneOff size={16} />} onClick={handleDisconnect} danger>
+            <Button
+              icon={<PhoneOff size={16} />}
+              onClick={handleDisconnect}
+              danger
+            >
               Disconnect
             </Button>
           ) : (
-            <Button icon={<Phone size={16} />} onClick={handleConnect} loading={isConnecting} type="primary">
+            <Button
+              icon={<Phone size={16} />}
+              onClick={handleConnect}
+              loading={isConnecting}
+              type="primary"
+            >
               Connect
             </Button>
           )
         ) : (
-          <Button icon={<Phone size={16} />} onClick={handleConnect} loading={isConnecting} type="primary">
+          <Button
+            icon={<Phone size={16} />}
+            onClick={handleConnect}
+            loading={isConnecting}
+            type="primary"
+          >
             Login & Connect
           </Button>
         )}
@@ -183,7 +215,7 @@ const Header = () => {
         )}
       </Space>
     </div>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

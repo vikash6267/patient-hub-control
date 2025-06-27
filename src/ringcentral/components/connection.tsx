@@ -1,14 +1,12 @@
-"use client"
+import { Button, Card, Space, Typography } from "antd";
+import { auto } from "manate/react";
 
-import { Button, Card, Space, Typography } from "antd"
-import { auto } from "manate/react"
+import type { Store } from "../store";
 
-import type { Store } from "../store"
-
-const { Text, Title } = Typography
+const { Text, Title } = Typography;
 
 const Connection = auto((props: { store: Store }) => {
-  const { store } = props
+  const { store } = props;
 
   return (
     <div style={{ maxWidth: 600, margin: "0 auto" }}>
@@ -41,7 +39,13 @@ const Connection = auto((props: { store: Store }) => {
             <Text>{store.config.authType.toUpperCase()}</Text>
           </div>
 
-          <Button type="primary" size="large" onClick={() => store.connect()} loading={store.isConnecting} block>
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => store.connect()}
+            loading={store.isConnecting}
+            block
+          >
             {store.isConnecting ? "Connecting..." : "Connect to RingCentral"}
           </Button>
 
@@ -51,7 +55,7 @@ const Connection = auto((props: { store: Store }) => {
         </Space>
       </Card>
     </div>
-  )
-})
+  );
+});
 
-export default Connection
+export default Connection;

@@ -1,28 +1,26 @@
-"use client"
+import React from "react";
+import { useEffect, useState } from "react";
+import { Layout as AntLayout, notification } from "antd";
+import { Outlet } from "react-router-dom";
 
-import  React from "react"
-import { useEffect, useState } from "react"
-import { Layout as AntLayout, notification } from "antd"
-import { Outlet } from "react-router-dom"
+import ActiveCallsPanel from "./calling/ActiveCallsPanel";
+import CallManager from "./calling/CallManager";
+import Header from "./Header";
+import Sidebar from "./Sidebar";
 
-import ActiveCallsPanel from "./calling/ActiveCallsPanel"
-import CallManager from "./calling/CallManager"
-import Header from "./Header"
-import Sidebar from "./Sidebar"
-
-const { Content, Sider } = AntLayout
+const { Content, Sider } = AntLayout;
 
 const Layout: React.FC = () => {
-  const [api, contextHolder] = notification.useNotification()
-  const [mounted, setMounted] = useState(false)
+  const [api, contextHolder] = notification.useNotification();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    globalThis.notifier = api
-    setMounted(true)
-  }, [api])
+    globalThis.notifier = api;
+    setMounted(true);
+  }, [api]);
 
   if (!mounted) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   return (
@@ -43,7 +41,7 @@ const Layout: React.FC = () => {
       <CallManager />
       <ActiveCallsPanel />
     </AntLayout>
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout;

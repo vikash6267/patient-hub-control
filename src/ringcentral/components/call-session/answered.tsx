@@ -1,27 +1,28 @@
-"use client"
-
-import { Button, Input, Popover, Select, Space } from "antd"
-import { auto } from "manate/react"
-import { useEffect, useState } from "react"
-import type CallSession from "ringcentral-web-phone/call-session"
+import { Button, Input, Popover, Select, Space } from "antd";
+import { auto } from "manate/react";
+import { useEffect, useState } from "react";
+import type CallSession from "ringcentral-web-phone/call-session";
 
 const AnsweredSession = auto((props: { session: CallSession }) => {
-  const { session } = props
-  const [dtmfPopoverVisible, setDtmfPopoverVisible] = useState(false)
-  const [dtmfString, setDtmfString] = useState("")
-  const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
+  const { session } = props;
+  const [dtmfPopoverVisible, setDtmfPopoverVisible] = useState(false);
+  const [dtmfString, setDtmfString] = useState("");
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
 
   useEffect(() => {
     const fetchDevices = async () => {
-      const newDevices = await navigator.mediaDevices.enumerateDevices()
-      if (newDevices.map((d) => d.deviceId).join("|") !== devices.map((d) => d.deviceId).join("|")) {
-        setDevices(newDevices)
+      const newDevices = await navigator.mediaDevices.enumerateDevices();
+      if (
+        newDevices.map((d) => d.deviceId).join("|") !==
+        devices.map((d) => d.deviceId).join("|")
+      ) {
+        setDevices(newDevices);
       }
-    }
-    fetchDevices()
-    const handler = setInterval(fetchDevices, 10000)
-    return () => clearInterval(handler)
-  }, [devices])
+    };
+    fetchDevices();
+    const handler = setInterval(fetchDevices, 10000);
+    return () => clearInterval(handler);
+  }, [devices]);
 
   return (
     <Space wrap>
@@ -40,12 +41,16 @@ const AnsweredSession = auto((props: { session: CallSession }) => {
         placement="top"
         content={
           <Space direction="vertical">
-            <Input placeholder="123#*" value={dtmfString} onChange={(e) => setDtmfString(e.target.value.trim())} />
+            <Input
+              placeholder="123#*"
+              value={dtmfString}
+              onChange={(e) => setDtmfString(e.target.value.trim())}
+            />
             <Button
               onClick={() => {
-                session.sendDtmf(dtmfString)
-                setDtmfString("")
-                setDtmfPopoverVisible(false)
+                session.sendDtmf(dtmfString);
+                setDtmfString("");
+                setDtmfPopoverVisible(false);
               }}
             >
               Send DTMF
@@ -57,10 +62,12 @@ const AnsweredSession = auto((props: { session: CallSession }) => {
       </Popover>
 
       <Select
-        options={devices.filter((d) => d.kind === "audioinput").map((d) => ({ value: d.deviceId, label: d.label }))}
+        options={devices
+          .filter((d) => d.kind === "audioinput")
+          .map((d) => ({ value: d.deviceId, label: d.label }))}
         value={session.inputDeviceId}
         onChange={(value) => {
-          session.changeInputDevice(value)
+          session.changeInputDevice(value);
         }}
         style={{ width: 200 }}
         placeholder="Select Microphone"
@@ -68,17 +75,19 @@ const AnsweredSession = auto((props: { session: CallSession }) => {
 
       {devices.filter((d) => d.kind === "audiooutput").length > 0 && (
         <Select
-          options={devices.filter((d) => d.kind === "audiooutput").map((d) => ({ value: d.deviceId, label: d.label }))}
+          options={devices
+            .filter((d) => d.kind === "audiooutput")
+            .map((d) => ({ value: d.deviceId, label: d.label }))}
           value={session.outputDeviceId}
           onChange={(value) => {
-            session.changeOutputDevice(value)
+            session.changeOutputDevice(value);
           }}
           style={{ width: 200 }}
           placeholder="Select Speaker"
         />
       )}
     </Space>
-  )
-})
+  );
+});
 
-export default AnsweredSession
+export default AnsweredSession;

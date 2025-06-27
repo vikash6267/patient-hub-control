@@ -1,22 +1,30 @@
-"use client"
+import {
+  Button,
+  Empty,
+  Form,
+  Input,
+  Select,
+  Space,
+  Typography,
+  Badge,
+  Card,
+} from "antd";
+import { auto } from "manate/react";
+import React from "react";
 
-import { Button, Empty, Form, Input, Select, Space, Typography, Badge, Card } from "antd"
-import { auto } from "manate/react"
-import React from "react"
-
-import type { Store } from "../store"
-import CallSession from "./call-session"
+import type { Store } from "../store";
+import CallSession from "./call-session";
 
 const Phone = auto((props: { store: Store }) => {
-  const { store } = props
-  const [callee, setCallee] = React.useState<string>("")
-  const [selectedCallerId, setSelectedCallerId] = React.useState<string>("")
+  const { store } = props;
+  const [callee, setCallee] = React.useState<string>("");
+  const [selectedCallerId, setSelectedCallerId] = React.useState<string>("");
 
   React.useEffect(() => {
     if (store.callerIds.length > 0 && !selectedCallerId) {
-      setSelectedCallerId(store.callerIds[0])
+      setSelectedCallerId(store.callerIds[0]);
     }
-  }, [store.callerIds, selectedCallerId])
+  }, [store.callerIds, selectedCallerId]);
 
   return (
     <>
@@ -30,12 +38,16 @@ const Phone = auto((props: { store: Store }) => {
         </Space>
       </div>
 
-      <Space direction="vertical" style={{ display: "flex", maxWidth: 800, margin: "0 auto" }}>
+      <Space
+        direction="vertical"
+        style={{ display: "flex", maxWidth: 800, margin: "0 auto" }}
+      >
         <Card>
           <Typography.Text>
             Connected as{" "}
             <strong>
-              {store.extInfo?.contact?.firstName} {store.extInfo?.contact?.lastName}
+              {store.extInfo?.contact?.firstName}{" "}
+              {store.extInfo?.contact?.lastName}
             </strong>
           </Typography.Text>
           <br />
@@ -65,8 +77,8 @@ const Phone = auto((props: { store: Store }) => {
                 onChange={(e) => setCallee(e.target.value.trim())}
                 onPressEnter={() => {
                   if (callee.trim().length > 0) {
-                    store.makeCall(callee, selectedCallerId)
-                    setCallee("")
+                    store.makeCall(callee, selectedCallerId);
+                    setCallee("");
                   }
                 }}
               />
@@ -76,8 +88,8 @@ const Phone = auto((props: { store: Store }) => {
               <Button
                 type="primary"
                 onClick={() => {
-                  store.makeCall(callee, selectedCallerId)
-                  setCallee("")
+                  store.makeCall(callee, selectedCallerId);
+                  setCallee("");
                 }}
                 disabled={callee.trim().length === 0}
                 block
@@ -98,14 +110,17 @@ const Phone = auto((props: { store: Store }) => {
                 </div>
               ))}
               {store.webPhone.callSessions.length === 0 && (
-                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No active calls" />
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description="No active calls"
+                />
               )}
             </>
           )}
         </Card>
       </Space>
     </>
-  )
-})
+  );
+});
 
-export default Phone
+export default Phone;
