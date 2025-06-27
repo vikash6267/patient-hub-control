@@ -31,7 +31,7 @@ import {
 import { ringCentralStore } from "../store/ringcentral";
 import type { Patient } from "../types";
 import CallHistoryPanel from "./CallHistoryPanel";
-import ConnectToRingCentral from "./ConnectToRingcentral";
+import ConnectToRingCentral from "./ConnectToRingCentral";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
